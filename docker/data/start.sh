@@ -73,8 +73,8 @@ else
 
 	if [ "$OT_SERVER_TEST_ACCOUNTS" = "true" ]; then
 		echo "Creating Test Accounts..."
-		mysql -u "$OT_DB_USER" -p"$OT_DB_PASSWORD" -h "$OT_DB_HOST" --port="$OT_DB_PORT" -D "$OT_DB_DATABASE" </crystalserver/01-test_account.sql
-		mysql -u "$OT_DB_USER" -p"$OT_DB_PASSWORD" -h "$OT_DB_HOST" --port="$OT_DB_PORT" -D "$OT_DB_DATABASE" </crystalserver/02-test_account_players.sql
+		mysql -u "$OT_DB_USER" -p"$OT_DB_PASSWORD" -h "$OT_DB_HOST" --port="$OT_DB_PORT" -D "$OT_DB_DATABASE" </loyaltypvpserver/01-test_account.sql
+		mysql -u "$OT_DB_USER" -p"$OT_DB_PASSWORD" -h "$OT_DB_HOST" --port="$OT_DB_PORT" -D "$OT_DB_DATABASE" </loyaltypvpserver/02-test_account_players.sql
 	else
 		echo "Skip Test Account creation!"
 	fi
@@ -144,4 +144,4 @@ echo "===== Start Server ====="
 echo ""
 
 ulimit -c unlimited
-exec crystalserver
+exec loyaltypvpserver

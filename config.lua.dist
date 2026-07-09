@@ -671,10 +671,10 @@ defaultPriority = "high"
 startupDatabaseOptimization = true
 
 -- Status server information
-ownerName = "Tryller"
+ownerName = "Violence"
 ownerEmail = "@gmail.com"
-url = "https://github.com/zimbadev/crystalserver"
-location = "South America"
+url = "https://github.com/Leo32onGIT/loyaltypvpserver"
+location = "The Internet"
 
 -- Sends Discord webhook notifications on startup, raids and shutdown.
 -- The URL layout is https://discord.com/api/webhooks/:id/:token
@@ -723,7 +723,7 @@ metricsOstreamInterval = 1000
 -- NOTE: Features added in this list will be forced to be used on OTCR
 -- These features can be found in "modules/gamelib/const.lua"
 OTCRFeatures = {
-    enableFeature = { 
+    enableFeature = {
         101, -- g_game.enableFeature(GameItemShader)
         102, -- g_game.enableFeature(GameCreatureAttachedEffect)
         103, -- g_game.enableFeature(GameCreatureShader)

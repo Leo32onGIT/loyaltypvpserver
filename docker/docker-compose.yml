@@ -1,4 +1,4 @@
-name: crystalserver
+name: loyaltypvpserver
 services:
   database:
     image: mariadb:latest
@@ -6,7 +6,7 @@ services:
     env_file:
       - '.env'
     networks:
-      - crystalserver-net
+      - loyaltypvpserver-net
     ports:
       - '$MYSQL_PORT:3306'
     volumes:
@@ -29,18 +29,18 @@ services:
     env_file:
       - '.env'
     networks:
-      - crystalserver-net
+      - loyaltypvpserver-net
     ports:
       - '$gameProtocolPort:$gameProtocolPort'
       - '$statusProtocolPort:$statusProtocolPort'
     volumes:
-      - '../:/srv/crystalserver'
+      - '../:/srv/loyaltypvpserver'
     depends_on:
       database:
         condition: service_healthy
 
   login:
-    image: crystalserver/login-server:latest
+    image: loyaltypvpserver/login-server:latest
     restart: unless-stopped
     ports:
       - '$LOGIN_HTTP_PORT:$LOGIN_HTTP_PORT'
@@ -48,7 +48,7 @@ services:
     env_file:
       - '.env'
     networks:
-      - crystalserver-net
+      - loyaltypvpserver-net
     depends_on:
       database:
         condition: service_healthy
@@ -57,5 +57,5 @@ volumes:
   db-volume:
 
 networks:
-  crystalserver-net:
+  loyaltypvpserver-net:
     driver: bridge

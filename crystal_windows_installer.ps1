@@ -318,7 +318,7 @@ $DevRoot = "C:\"
 
 $VcpkgRoot = Join-Path $DevRoot "vcpkg"
 $VcpkgToolchainFile = Join-Path $VcpkgRoot "scripts\buildsystems\vcpkg.cmake"
-$ProjectRoot = Join-Path $DevRoot "crystalserver"
+$ProjectRoot = Join-Path $DevRoot "loyaltypvpserver"
 
 # --- Krok 5: Konfiguracja vcpkg ---
 Write-Host ""
@@ -334,7 +334,7 @@ try {
         Write-Host $lang.Step5Clone
         git clone https://github.com/Microsoft/vcpkg.git
         if ($LASTEXITCODE -ne 0) { throw "Git clone vcpkg failed." }
-        
+
         Write-Host $lang.Step5Build
         Set-Location $VcpkgRoot
         ./bootstrap-vcpkg.bat
@@ -347,7 +347,7 @@ try {
     Write-Host $lang.Step5InstallLibs
     ./vcpkg install openssl:x64-windows boost:x64-windows
     if ($LASTEXITCODE -ne 0) { throw "vcpkg install libraries failed." }
-    
+
     Read-Host -Prompt $lang.Step5PromptDone
 } catch {
     Write-Error "STEP 5 FAILED: $($_.Exception.Message)"
@@ -364,12 +364,12 @@ try {
 
     if (-not (Test-Path $ProjectRoot)) {
         Write-Host ($lang.Step6Clone -f $branchName)
-        git clone -b $branchName https://github.com/zimbadev/crystalserver.git
-        if ($LASTEXITCODE -ne 0) { throw "Git clone crystalserver failed." }
+        git clone -b $branchName https://github.com/Leo32onGIT/loyaltypvpserver.git
+        if ($LASTEXITCODE -ne 0) { throw "Git clone loyaltypvpserver failed." }
     } else {
         Write-Host $lang.Step6Exists
     }
-    
+
     Read-Host -Prompt $lang.Step6PromptDone
 } catch {
     Write-Error "STEP 6 FAILED: $($_.Exception.Message)"
@@ -391,11 +391,11 @@ try {
 
     Write-Host $lang.Step7Config
     cmake .. -G "Visual Studio 17 2022" -A x64 -DCMAKE_TOOLCHAIN_FILE="$($VcpkgToolchainFile)" -DWITH_MYSQL=OFF
-    
+
     if ($LASTEXITCODE -ne 0) {
         throw "CMake configuration failed. Check the errors above."
     }
-    
+
     Write-Host $lang.Step7Success
     Read-Host -Prompt $lang.Step7PromptDone
 } catch {
@@ -412,7 +412,7 @@ Write-Host $lang.Step8Title -ForegroundColor Green
 try {
     Write-Host $lang.Step8Desc
     cmake --build . --config Release
-    
+
     if ($LASTEXITCODE -ne 0) {
         throw "CMake build failed. Check the errors above."
     }
@@ -424,7 +424,7 @@ try {
     Write-Host $lang.DonePath
     Write-Host "$BuildDir\bin\Release"
     Write-Host ""
-    
+
 } catch {
     Write-Error $lang.Step8Error
     Write-Error "DETAILS: $($_.Exception.Message)"

@@ -34,14 +34,14 @@ FROM ubuntu:24.04
 
 VOLUME [ "/data" ]
 
-COPY --from=build /srv/build/linux-release/bin/crystalserver /bin/crystalserver
-COPY LICENSE *.sql key.pem /crystalserver/
-COPY data /crystalserver/data
-COPY data-crystal /crystalserver/data-crystal
-COPY data-global /crystalserver/data-global
-COPY config.lua.dist /crystalserver/config.lua
+COPY --from=build /srv/build/linux-release/bin/loyaltypvpserver /bin/loyaltypvpserver
+COPY LICENSE *.sql key.pem /loyaltypvpserver/
+COPY data /loyaltypvpserver/data
+COPY data-crystal /loyaltypvpserver/data-crystal
+COPY data-global /loyaltypvpserver/data-global
+COPY config.lua.dist /loyaltypvpserver/config.lua
 
-WORKDIR /crystalserver
+WORKDIR /loyaltypvpserver
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
 	mariadb-client libluajit-5.1-dev libluajit-5.1-common wget curl \
@@ -52,4 +52,4 @@ COPY docker/data/01-test_account.sql 01-test_account.sql
 COPY docker/data/02-test_account_players.sql 02-test_account_players.sql
 COPY docker/data/start.sh start.sh
 
-ENTRYPOINT ["/crystalserver/start.sh"]
+ENTRYPOINT ["/loyaltypvpserver/start.sh"]

@@ -386,6 +386,8 @@ sftp-config.json
 # Binaries
 crystalserver
 crystalserver.old
+loyaltypvpserver
+loyaltypvpserver.old
 
 # VCPKG
 vcpkg_installed
