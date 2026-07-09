@@ -81,6 +81,6 @@ jobs:
       - name: Create and Upload Artifact
         uses: actions/upload-artifact@main
         with:
-          name: crystalserver-${{ matrix.buildtype }}-${{ github.sha }}
+          name: loyaltypvpserver-${{ matrix.buildtype }}-${{ github.sha }}
           path: |
             ${{ github.workspace }}/build/${{ matrix.buildtype }}/bin/

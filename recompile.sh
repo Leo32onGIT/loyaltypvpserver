@@ -18,8 +18,8 @@
 #
 # Examples:
 #   ./recompile.sh
-#   ./recompile.sh /home/crystalserver
-#   ./recompile.sh /home/crystalserver linux-debug
+#   ./recompile.sh /home/loyaltypvpserver
+#   ./recompile.sh /home/loyaltypvpserver linux-debug
 #
 # Features:
 #   ✓ Real-time progress bar with percentage
