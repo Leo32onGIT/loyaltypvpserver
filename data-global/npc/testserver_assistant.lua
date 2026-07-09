@@ -3,8 +3,8 @@ local npcType = Game.createNpcType(internalNpcName)
 local npcConfig = {
 	amountMoney = 100, -- 1 kk
 	amountTibiaCoin = 1000, -- 1000 tibia coins
-	amountLevel = 100, -- 100 levels per try
-	maxLevel = 600, -- maximum test server level
+	amountLevel = 200, -- 100 levels per try
+	maxLevel = 3000, -- maximum test server level
 }
 
 npcConfig.name = internalNpcName
@@ -16,7 +16,7 @@ npcConfig.walkInterval = 2000
 npcConfig.walkRadius = 2
 
 npcConfig.outfit = {
-	lookType = 396,
+	lookType = 266,
 	lookHead = 0,
 	lookBody = 0,
 	lookLegs = 0,

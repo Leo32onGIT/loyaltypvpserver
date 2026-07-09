@@ -776,11 +776,11 @@ void ProtocolGame::login(const std::string &name, uint32_t accountId, OperatingS
 
 		acceptPackets = true;
 	} else {
-		if (eventConnect != 0 || !g_configManager().getBoolean(REPLACE_KICK_ON_LOGIN)) {
+		//if (eventConnect != 0 || !g_configManager().getBoolean(REPLACE_KICK_ON_LOGIN)) {
 			// Already trying to connect
-			disconnectClient("You are already logged in.");
-			return;
-		}
+			//disconnectClient("You are already logged in.");
+			//return;
+		//}
 
 		if (foundPlayer->client) {
 			foundPlayer->disconnect();
