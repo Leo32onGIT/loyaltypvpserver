@@ -8,14 +8,14 @@
 #   Interactive build script with real-time progress visualization
 #   Shows live output of CMake configuration and compilation
 #
-# Usage: 
+# Usage:
 #   ./recompile.sh [vcpkg_base_path] [build_type]
-# 
+#
 # Parameters:
 #   vcpkg_base_path : Base directory containing vcpkg (default: $HOME)
 #   build_type      : CMake preset to use (default: linux-release)
 #                     Options: linux-release, linux-debug, linux-test
-# 
+#
 # Examples:
 #   ./recompile.sh
 #   ./recompile.sh /home/crystalserver
@@ -77,12 +77,12 @@ setup_crystalserver() {
 build_crystalserver() {
 	info "Configuring Crystal Server with CMake..."
 	echo -e "\033[1;33m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
-	
+
 	if [[ $ARCHITECTUREVALUE == 1 ]]; then
 		export VCPKG_FORCE_SYSTEM_BINARIES=1
 		info "ARM64 detected - Setting VCPKG_FORCE_SYSTEM_BINARIES=1"
 	fi
-	
+
 	# Run CMake configuration with live output
 	if ! cmake -DCMAKE_TOOLCHAIN_FILE="$VCPKG_PATH" .. --preset "$BUILD_TYPE" 2>&1 | tee cmake_log.txt; then
 		echo -e "\033[31m[ERROR]\033[0m CMake configuration failed!"
@@ -109,39 +109,39 @@ build_crystalserver() {
 			total_steps=${BASH_REMATCH[2]}
 			last_message=${BASH_REMATCH[3]}
 			progress=$((current_step * 100 / total_steps))
-			
+
 			# Create progress bar
 			local bar_width=40
 			local filled=$((progress * bar_width / 100))
 			local empty=$((bar_width - filled))
 			local bar=$(printf "%${filled}s" | tr ' ' '█')$(printf "%${empty}s" | tr ' ' '░')
-			
+
 			printf "\r\033[1;32m[PROGRESS]\033[0m [%s] %3d%% (%d/%d) " "$bar" "$progress" "$current_step" "$total_steps"
-			
+
 		# Check for vcpkg installing packages
 		elif [[ $line =~ [Ii]nstalling.*package ]]; then
 			echo -e "\n\033[1;36m[VCPKG]\033[0m $line"
-			
+
 		# Check for vcpkg building packages
 		elif [[ $line =~ [Bb]uilding.*package|[Bb]uilding[[:space:]].*:.*$ ]]; then
 			echo -e "\n\033[1;35m[BUILD]\033[0m $line"
-			
+
 		# Check for errors
 		elif [[ $line =~ [Ee]rror|[Ff]ailed ]]; then
 			echo -e "\n\033[1;31m[ERROR]\033[0m $line"
-			
+
 		# Check for warnings
 		elif [[ $line =~ [Ww]arning ]]; then
 			echo -e "\n\033[1;33m[WARN]\033[0m $line"
-			
+
 		# Show important vcpkg status messages
 		elif [[ $line =~ ^Starting\ package|^Elapsed\ time|^Total\ installed ]]; then
 			echo -e "\n\033[1;34m[INFO]\033[0m $line"
 		fi
 	done
-	
+
 	build_status=${PIPESTATUS[0]}
-	
+
 	echo -e "\n"
 	echo -e "\033[1;33m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
 
@@ -157,24 +157,24 @@ build_crystalserver() {
 
 # Function to move the generated executable
 move_executable() {
-	local executable_name="crystalserver"
+	local executable_name="loyaltypvpserver"
 	cd ..
-	
+
 	# Construct the correct path based on BUILD_TYPE
 	local executable_path="./build/$BUILD_TYPE/bin/$executable_name"
-	
+
 	# Check if the executable exists
 	if [ ! -f "$executable_path" ]; then
 		echo -e "\033[31m[ERROR]\033[0m Executable not found at: $executable_path"
 		exit 1
 	fi
-	
+
 	if [ -e "$executable_name" ]; then
 		info "Saving old build"
 		mv ./"$executable_name" ./"$executable_name".old
 	fi
-	
-	info "Moving the generated executable to the crystalserver folder directory..."
+
+	info "Moving the generated executable to the loyaltypvpserver folder directory..."
 	cp "$executable_path" ./"$executable_name"
 	chmod +x ./"$executable_name"
 	info "Build completed successfully!"
@@ -187,20 +187,20 @@ main() {
 	echo -e "\033[1;36m║         CrystalServer Build System - Interactive Mode             ║\033[0m"
 	echo -e "\033[1;36m╚════════════════════════════════════════════════════════════════════╝\033[0m"
 	echo ""
-	
+
 	# Check if vcpkg toolchain file exists
 	if [ ! -f "$VCPKG_PATH" ]; then
 		echo -e "\033[31m[ERROR]\033[0m vcpkg toolchain file not found at: $VCPKG_PATH"
 		echo -e "\033[33m[INFO]\033[0m Please install vcpkg or specify the correct path."
 		echo -e "\033[33m[INFO]\033[0m Usage: $0 [vcpkg_base_path] [build_type]"
-		echo -e "\033[33m[INFO]\033[0m Example: $0 /home/crystalserver linux-release"
+		echo -e "\033[33m[INFO]\033[0m Example: $0 /home/loyaltypvpserver linux-release"
 		exit 1
 	fi
-	
+
 	info "Using vcpkg from: $VCPKG_PATH"
 	info "Build type: $BUILD_TYPE"
 	echo ""
-	
+
 	check_command "cmake"
 	check_architecture
 	echo ""
@@ -208,25 +208,25 @@ main() {
 	echo ""
 
 	local start_time=$(date +%s)
-	
+
 	if build_crystalserver; then
 		move_executable
 		local end_time=$(date +%s)
 		local elapsed=$((end_time - start_time))
 		local minutes=$((elapsed / 60))
 		local seconds=$((elapsed % 60))
-		
+
 		echo ""
 		echo -e "\033[1;36m╔════════════════════════════════════════════════════════════════════╗\033[0m"
 		echo -e "\033[1;36m║                    BUILD COMPLETED SUCCESSFULLY!                   ║\033[0m"
 		echo -e "\033[1;36m╚════════════════════════════════════════════════════════════════════╝\033[0m"
 		echo ""
-		echo -e "\033[1;32m✓\033[0m Executable: \033[1;37m$(pwd)/crystalserver\033[0m"
+		echo -e "\033[1;32m✓\033[0m Executable: \033[1;37m$(pwd)/loyaltypvpserver\033[0m"
 		echo -e "\033[1;32m✓\033[0m Build time: \033[1;37m${minutes}m ${seconds}s\033[0m"
 		echo -e "\033[1;32m✓\033[0m Logs saved: \033[1;37mbuild/cmake_log.txt, build/build_log.txt\033[0m"
 		echo ""
 		echo -e "\033[1;33mTo run the server:\033[0m"
-		echo -e "  \033[1;37m./crystalserver\033[0m"
+		echo -e "  \033[1;37m./loyaltypvpserver\033[0m"
 		echo ""
 	else
 		local end_time=$(date +%s)
