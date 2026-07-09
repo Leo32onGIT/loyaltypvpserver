@@ -34,7 +34,6 @@ RUN ./recompile.sh "/opt"
 
 # Stage 3: execute
 FROM ubuntu:24.04 AS prod
-COPY --from=build /srv/build/build/linux-release/bin/crystalserver /bin/crystalserver
-WORKDIR /srv/crystalserver
-ENTRYPOINT ["/srv/crystalserver/start.sh", "crystalserver"]
-
+COPY --from=build /srv/build/build/linux-release/bin/loyaltypvpserver /bin/loyaltypvpserver
+WORKDIR /srv/loyaltypvpserver
+ENTRYPOINT ["/srv/loyaltypvpserver/start.sh", "loyaltypvpserver"]
