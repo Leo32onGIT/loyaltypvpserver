@@ -954,19 +954,19 @@ void ProtocolGame::onRecvFirstMessage(NetworkMessage &msg) {
 
 	const auto &onlinePlayer = g_game().getPlayerByName(characterName);
 	const auto &foundPlayer = !onlinePlayer ? g_game().getDeadPlayer(characterName) : onlinePlayer;
-	if (foundPlayer && foundPlayer->client) {
-		if (foundPlayer->isDead()) {
-			disconnectClient("You are already logged in.");
-			return;
-		}
+	//if (foundPlayer && foundPlayer->client) {
+	//	if (foundPlayer->isDead()) {
+	//		disconnectClient("You are already logged in.");
+	//		return;
+	//	}
 
-		auto message = fmt::format("You are already connected through another client. Please use only one client at a time!");
-		if (foundPlayer->getProtocolVersion() != getVersion() && foundPlayer->isOldProtocol() != oldProtocol) {
-			message = fmt::format("You are already logged in using protocol '{}'. Please log out from the other session to connect here.", foundPlayer->getProtocolVersion());
-		}
-
-		foundPlayer->client->disconnectClient(message, DisconnectClient_t::Notice);
-	}
+	//	auto message = fmt::format("You are already connected through another client. Please use only one client at a time!");
+	//	if (foundPlayer->getProtocolVersion() != getVersion() && foundPlayer->isOldProtocol() != oldProtocol) {
+	//		message = fmt::format("You are already logged in using protocol '{}'. Please log out from the other session to connect here.", foundPlayer->getProtocolVersion());
+	//	}
+	//
+	//	foundPlayer->client->disconnectClient(message, DisconnectClient_t::Notice);
+	//}
 
 	auto timeStamp = msg.get<uint32_t>();
 	uint8_t randNumber = msg.getByte();
