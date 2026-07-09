@@ -19,12 +19,12 @@ set(VCPKG_BUILD_TYPE "release")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # *****************************************************************************
-# Project crystalserver
+# Project loyaltypvpserver
 # *****************************************************************************
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-    project(crystalserver-debug LANGUAGES CXX)
+    project(loyaltypvpserver-debug LANGUAGES CXX)
 else()
-    project(crystalserver LANGUAGES CXX)
+    project(loyaltypvpserver LANGUAGES CXX)
 endif()
 
 # *****************************************************************************

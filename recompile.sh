@@ -63,7 +63,7 @@ check_architecture() {
 }
 
 # Function to configure Crystal Server
-setup_crystalserver() {
+setup_loyaltypvpserver() {
 	if [ -d "build" ]; then
 		info "Build directory already exists..."
 		cd build
@@ -74,7 +74,7 @@ setup_crystalserver() {
 }
 
 # Function to build Crystal Server
-build_crystalserver() {
+build_loyaltypvpserver() {
 	info "Configuring Crystal Server with CMake..."
 	echo -e "\033[1;33m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
 
@@ -204,12 +204,12 @@ main() {
 	check_command "cmake"
 	check_architecture
 	echo ""
-	setup_crystalserver
+	setup_loyaltypvpserver
 	echo ""
 
 	local start_time=$(date +%s)
 
-	if build_crystalserver; then
+	if build_loyaltypvpserver; then
 		move_executable
 		local end_time=$(date +%s)
 		local elapsed=$((end_time - start_time))

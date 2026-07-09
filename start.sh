@@ -1,6 +1,6 @@
 #!/bin/bash
 
-BIN_PATH=${1:-"./crystalserver"}
+BIN_PATH=${1:-"./loyaltypvpserver"}
 
 if [ -d "logs" ]; then
     echo -e "\e[01;32m Starting server \e[0m"
@@ -25,7 +25,7 @@ trap 'echo -e "\n[Info] Ctrl+C pressed. Press again within 2 seconds to exit."; 
 while true; do
     restart_count=$((restart_count + 1))
     LOG_FILE="logs/$(date +"%F %H-%M-%S").log"
-    echo -e "\n[Info] Starting CrystalServer (restart #$restart_count)"
+    echo -e "\n[Info] Starting Loyalty PVP Server (restart #$restart_count)"
 
     "$BIN_PATH" 2>&1 | awk '{ print strftime("%F %T - "), $0; fflush(); }' | tee "$LOG_FILE" &
     SERVER_PID=$!

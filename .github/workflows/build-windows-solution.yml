@@ -71,7 +71,7 @@ jobs:
       - name: Build project
         env:
           GITHUB_WORKSPACE: ${{ github.workspace }}
-        run: msbuild.exe /p:VcpkgEnableManifest=true /p:Configuration=Debug /p:Platform=x64 /p:GITHUB_WORKSPACE="$env:GITHUB_WORKSPACE" vcproj/crystalserver.sln
+        run: msbuild.exe /p:VcpkgEnableManifest=true /p:Configuration=Debug /p:Platform=x64 /p:GITHUB_WORKSPACE="$env:GITHUB_WORKSPACE" vcproj/loyaltypvpserver.sln
 
       - name: Upload artifacts
         uses: actions/upload-artifact@main
