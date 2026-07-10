@@ -648,20 +648,17 @@ void ProtocolGame::login(const std::string &name, uint32_t accountId, OperatingS
 	    createClone = true;
 	}
 
-	if (!foundPlayer || createClone) {
-		if (createClone) {
-		    player = foundPlayer->createClone(getThis());
-		    player->setID();
-		} else {
-        player = std::make_shared<Player>(getThis());
-        player->setName(name);
-
-        if (!IOLoginDataLoad::preLoadPlayer(player, name)) {
-            disconnectClient("Your character could not be loaded.");
-            return;
-        }
-
-        player->setID();
+	if (createClone) {
+	    player = foundPlayer->createClone(getThis());
+			player->setID();
+	} else {
+	    player = std::make_shared<Player>(getThis());
+	    player->setName(name);
+			player->setID();
+	}
+		if (!IOLoginDataLoad::preLoadPlayer(player, name)) {
+        disconnectClient("Your character could not be loaded.");
+        return;
     }
 
 		if (IOBan::isPlayerNamelocked(player->getGUID())) {
