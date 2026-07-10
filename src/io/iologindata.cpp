@@ -471,7 +471,7 @@ void IOLoginData::removeGuidVIPGroupEntry(uint32_t accountId, uint32_t guid) {
 void IOLoginData::updateOnlineStatus(uint32_t guid, bool login) {
 	std::string query;
 	if (login) {
-		query = fmt::format("INSERT INTO `players_online` VALUES ({}) ON DUPLICATE KEY UPDATE guid = guid", guid);
+		query = fmt::format("INSERT INTO `players_online` VALUES ({}) ON DUPLICATE KEY UPDATE id = id", guid);
 	} else {
 		query = fmt::format("DELETE FROM `players_online` WHERE `player_id` = {}", guid);
 	}
