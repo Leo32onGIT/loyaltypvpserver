@@ -45,7 +45,7 @@ local FLANK_AREAS = {
 		{ 1, 0, 1 },
 		{ 1, 0, 1 },
 		{ 1, 0, 1 },
-		{ 0, 3, 0 },
+		{ 1, 3, 1 },
 	},
 	{
 		{ 1, 0, 1 },
@@ -55,7 +55,7 @@ local FLANK_AREAS = {
 		{ 1, 0, 1 },
 		{ 1, 0, 1 },
 		{ 1, 0, 1 },
-		{ 0, 3, 0 },
+		{ 1, 3, 1 },
 	},
 	{
 		{ 1, 0, 1 },
@@ -66,7 +66,7 @@ local FLANK_AREAS = {
 		{ 1, 0, 1 },
 		{ 1, 0, 1 },
 		{ 1, 0, 1 },
-		{ 0, 3, 0 },
+		{ 1, 3, 1 },
 	},
 }
 local FLANK_CB = { "onGetFormulaValuesBeamFlank1", "onGetFormulaValuesBeamFlank2", "onGetFormulaValuesBeamFlank3" }
