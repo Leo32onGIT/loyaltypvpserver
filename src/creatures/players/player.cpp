@@ -183,23 +183,7 @@ std::shared_ptr<Player> Player::createClone(std::shared_ptr<ProtocolGame> p)
 
     clone->guid = guid;
     clone->setName(getName());
-
     clone->setClone(true);
-
-    // copy the persistent character state you want
-    clone->level = level;
-    clone->experience = experience;
-
-    clone->health = health;
-    clone->mana = mana;
-    clone->capacity = capacity;
-
-    clone->setVocation(getVocation());
-
-    clone->outfit = outfit;
-
-    // position
-    clone->loginPosition = loginPosition;
 
     return clone;
 }
