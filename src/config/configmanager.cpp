@@ -152,6 +152,7 @@ bool ConfigManager::load() {
 	loadBoolConfig(L, REMOVE_WEAPON_AMMO, "removeWeaponAmmunition", true);
 	loadBoolConfig(L, REMOVE_WEAPON_CHARGES, "removeWeaponCharges", true);
 	loadBoolConfig(L, REPLACE_KICK_ON_LOGIN, "replaceKickOnLogin", true);
+	loadBoolConfig(L, ALLOW_CLONES, "allowClones", false);
 	loadBoolConfig(L, REWARD_CHEST_COLLECT_ENABLED, "rewardChestCollectEnabled", true);
 	loadBoolConfig(L, SCRIPTS_CONSOLE_LOGS, "showScriptsLogInConsole", true);
 	loadBoolConfig(L, SHOW_LOOTS_IN_BESTIARY, "showLootsInBestiary", false);

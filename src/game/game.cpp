@@ -1092,9 +1092,12 @@ std::shared_ptr<Creature> Game::getCreatureByName(const std::string &s) {
 
 	auto m_it = mappedPlayerNames.find(lowerCaseName);
 	if (m_it != mappedPlayerNames.end()) {
-		return m_it->second.lock();
+		for (const auto &weakPlayer : m_it->second) {
+			if (auto player = weakPlayer.lock()) {
+				return player;
+			}
+		}
 	}
-
 	for (const auto &it : npcs) {
 		if (lowerCaseName == asLowerCaseString(it.second->getName())) {
 			return it.second;
@@ -1129,23 +1132,30 @@ std::shared_ptr<Player> Game::getPlayerByName(const std::string &s, bool allowOf
 	}
 
 	auto it = mappedPlayerNames.find(asLowerCaseString(s));
-	if (it == mappedPlayerNames.end() || it->second.expired()) {
-		if (!allowOffline) {
-			return nullptr;
-		}
-		std::shared_ptr<Player> tmpPlayer = std::make_shared<Player>(nullptr);
-		if (!IOLoginData::loadPlayerByName(tmpPlayer, s)) {
-			if (!isNewName) {
-				g_logger().error("Failed to load player {} from database", s);
-			} else {
-				g_logger().info("New name {} is available", s);
+	if (it != mappedPlayerNames.end()) {
+		for (const auto &weakPlayer : it->second) {
+			if (auto player = weakPlayer.lock()) {
+				return player;
 			}
-			return nullptr;
 		}
-		tmpPlayer->setOnline(false);
-		return tmpPlayer;
 	}
-	return it->second.lock();
+
+	if (!allowOffline) {
+		return nullptr;
+	}
+
+	std::shared_ptr<Player> tmpPlayer = std::make_shared<Player>(nullptr);
+	if (!IOLoginData::loadPlayerByName(tmpPlayer, s)) {
+		if (!isNewName) {
+			g_logger().error("Failed to load player {} from database", s);
+		} else {
+			g_logger().info("New name {} is available", s);
+		}
+		return nullptr;
+	}
+
+	tmpPlayer->setOnline(false);
+	return tmpPlayer;
 }
 
 std::shared_ptr<Player> Game::getPlayerByGUID(const uint32_t &guid, bool allowOffline /* = false */) {
@@ -11278,17 +11288,44 @@ std::shared_ptr<Player> Game::getDeadPlayer(const std::string &playerName) {
 }
 
 void Game::addPlayer(const std::shared_ptr<Player> &player) {
-	const std::string &lowercase_name = asLowerCaseString(player->getName());
-	mappedPlayerNames[lowercase_name] = player;
-	wildcardTree->insert(lowercase_name);
-	players[player->getID()] = player;
+    const std::string lowercase_name = asLowerCaseString(player->getName());
+
+    mappedPlayerNames[lowercase_name].push_back(player);
+
+    if (mappedPlayerNames[lowercase_name].size() == 1) {
+        wildcardTree->insert(lowercase_name);
+    }
+
+    players[player->getID()] = player;
 }
 
 void Game::removePlayer(const std::shared_ptr<Player> &player) {
-	const std::string &lowercase_name = asLowerCaseString(player->getName());
-	mappedPlayerNames.erase(lowercase_name);
-	wildcardTree->remove(lowercase_name);
-	players.erase(player->getID());
+    const std::string lowercase_name = asLowerCaseString(player->getName());
+
+    auto it = mappedPlayerNames.find(lowercase_name);
+
+    if (it != mappedPlayerNames.end()) {
+
+        auto &list = it->second;
+
+        list.erase(
+            std::remove_if(
+                list.begin(),
+                list.end(),
+                [&player](const std::weak_ptr<Player> &p) {
+                    return p.expired() || p.lock() == player;
+                }),
+            list.end()
+        );
+
+
+        if (list.empty()) {
+            mappedPlayerNames.erase(it);
+            wildcardTree->remove(lowercase_name);
+        }
+    }
+
+    players.erase(player->getID());
 }
 
 void Game::addNpc(const std::shared_ptr<Npc> &npc) {

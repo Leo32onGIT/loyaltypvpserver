@@ -159,13 +159,49 @@ uint32_t Player::getLastID() {
 }
 
 void Player::setID() {
-	// guid = player id from database
-	if (id == 0 && guid != 0) {
-		id = getFirstID() + guid;
-		if (id == std::numeric_limits<uint32_t>::max()) {
-			g_logger().error("[{}] Player {} has max 'id' value of uint32_t", __FUNCTION__, getName());
-		}
+
+	if (id != 0) {
+		return;
 	}
+
+	if (guid != 0) {
+
+		if (clone) {
+			static uint32_t nextCloneID = getLastID();
+
+			id = nextCloneID--;
+			return;
+		}
+
+		id = getFirstID() + guid;
+	}
+}
+
+std::shared_ptr<Player> Player::createClone(std::shared_ptr<ProtocolGame> p)
+{
+    auto clone = std::make_shared<Player>(p);
+
+    clone->guid = guid;
+    clone->setName(getName());
+
+    clone->setClone(true);
+
+    // copy the persistent character state you want
+    clone->level = level;
+    clone->experience = experience;
+
+    clone->health = health;
+    clone->mana = mana;
+    clone->capacity = capacity;
+
+    clone->setVocation(getVocation());
+
+    clone->outfit = outfit;
+
+    // position
+    clone->loginPosition = loginPosition;
+
+    return clone;
 }
 
 std::string Player::getDescription(int32_t lookDistance) {

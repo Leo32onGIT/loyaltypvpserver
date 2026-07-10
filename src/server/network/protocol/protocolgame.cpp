@@ -641,16 +641,28 @@ void ProtocolGame::login(const std::string &name, uint32_t accountId, OperatingS
 
 	// dispatcher thread
 	std::shared_ptr<Player> foundPlayer = g_game().getPlayerByName(name);
-	if (!foundPlayer) {
-		player = std::make_shared<Player>(getThis());
-		player->setName(name);
 
-		player->setID();
+	bool createClone = false;
 
-		if (!IOLoginDataLoad::preLoadPlayer(player, name)) {
-			disconnectClient("Your character could not be loaded.");
-			return;
-		}
+	if (foundPlayer && g_configManager().getBoolean(ALLOW_CLONES)) {
+	    createClone = true;
+	}
+
+	if (!foundPlayer || createClone) {
+		if (createClone) {
+		    player = foundPlayer->createClone(getThis());
+		    player->setID();
+		} else {
+        player = std::make_shared<Player>(getThis());
+        player->setName(name);
+
+        if (!IOLoginDataLoad::preLoadPlayer(player, name)) {
+            disconnectClient("Your character could not be loaded.");
+            return;
+        }
+
+        player->setID();
+    }
 
 		if (IOBan::isPlayerNamelocked(player->getGUID())) {
 			disconnectClient("Your character has been namelocked.");
@@ -776,26 +788,24 @@ void ProtocolGame::login(const std::string &name, uint32_t accountId, OperatingS
 
 		acceptPackets = true;
 	} else {
-		//if (eventConnect != 0 || !g_configManager().getBoolean(REPLACE_KICK_ON_LOGIN)) {
-			// Already trying to connect
-			//disconnectClient("You are already logged in.");
-			//return;
-		//}
+	    if (!foundPlayer) {
+	        return;
+	    }
 
-		if (foundPlayer->client && g_configManager().getBoolean(REPLACE_KICK_ON_LOGIN)) {
-        foundPlayer->disconnect();
-        foundPlayer->isConnecting = true;
+	    if (foundPlayer->client && g_configManager().getBoolean(REPLACE_KICK_ON_LOGIN)) {
+	        foundPlayer->disconnect();
+	        foundPlayer->isConnecting = true;
 
-        eventConnect = g_dispatcher().scheduleEvent(
-            1000,
-            [self = getThis(), playerName = foundPlayer->getName(), operatingSystem] {
-                self->connect(playerName, operatingSystem);
-            },
-            "ProtocolGame::connect"
-        );
-    } else {
-        connect(foundPlayer->getName(), operatingSystem);
-    }
+	        eventConnect = g_dispatcher().scheduleEvent(
+	            1000,
+	            [self = getThis(), playerName = foundPlayer->getName(), operatingSystem] {
+	                self->connect(playerName, operatingSystem);
+	            },
+	            "ProtocolGame::connect"
+	        );
+	    } else {
+	        connect(foundPlayer->getName(), operatingSystem);
+	    }
 	}
 	OutputMessagePool::getInstance().addProtocolToAutosend(shared_from_this());
 	sendBosstiaryCooldownTimer();
