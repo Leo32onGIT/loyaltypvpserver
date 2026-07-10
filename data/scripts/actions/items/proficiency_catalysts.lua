@@ -1,6 +1,6 @@
 local config = {
-	[51588] = { gainWeaponProficiencyExperience = 25000 },
-	[51589] = { gainWeaponProficiencyExperience = 100000 },
+	[51588] = { gainWeaponProficiencyExperience = 5000000 },
+	[51589] = { gainWeaponProficiencyExperience = 10000000 },
 }
 
 local proficiencyCatalysts = Action()
