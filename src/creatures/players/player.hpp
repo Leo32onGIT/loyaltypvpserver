@@ -275,7 +275,7 @@ public:
 	~Player() override;
 
 	std::shared_ptr<Player> createClone(std::shared_ptr<ProtocolGame> p);
-	
+
 	// non-copyable
 	Player(const Player &) = delete;
 	Player &operator=(const Player &) = delete;
@@ -2118,5 +2118,12 @@ private:
 	void addWeaponProficiencyExperience(const std::shared_ptr<MonsterType> &mType, const ForgeClassifications_t classification, const bool bossSoulpit);
 	EquippedWeaponProficiencyBonuses equippedWeaponProficiency;
 
-	bool isClone = false;
+	bool clone = false;
+	void setClone(bool value) {
+	    clone = value;
+	}
+
+	bool isClone() const {
+	    return clone;
+	}
 };
