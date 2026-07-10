@@ -5045,9 +5045,7 @@ void ProtocolGame::sendBasicData() {
 			continue;
 		}
 
-		if (spell->isLearnable() && !player->hasLearnedInstantSpell(spell->getName())) {
-			msg.add<uint16_t>(0);
-		} else if (spell && spell->isLearnable() && player->hasLearnedInstantSpell(spell->getName())) {
+		if (spell && spell->isLearnable() && player->hasLearnedInstantSpell(spell->getName())) {
 			// Ignore spell if not have wheel grade (or send if you have)
 			auto grade = player->wheel()->getSpellUpgrade(spell->getName());
 			if (static_cast<uint8_t>(grade) == 0) {
