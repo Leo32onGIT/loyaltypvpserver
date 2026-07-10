@@ -159,22 +159,25 @@ uint32_t Player::getLastID() {
 }
 
 void Player::setID() {
-
 	if (id != 0) {
 		return;
 	}
 
-	if (guid != 0) {
-
-		if (clone) {
-			static uint32_t nextCloneID = getLastID();
-
-			id = nextCloneID--;
-			return;
-		}
-
-		id = getFirstID() + guid;
+	if (guid == 0) {
+		return;
 	}
+
+	if (clone) {
+		static uint32_t nextCloneID = getLastID();
+		id = nextCloneID--;
+
+		if (id < getFirstID()) {
+			g_logger().error("Clone ID range exhausted");
+			id = 0;
+		}
+		return;
+	}
+	id = getFirstID() + guid;
 }
 
 std::shared_ptr<Player> Player::createClone(std::shared_ptr<ProtocolGame> p)
