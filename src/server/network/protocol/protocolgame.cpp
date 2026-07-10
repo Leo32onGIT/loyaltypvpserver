@@ -782,17 +782,20 @@ void ProtocolGame::login(const std::string &name, uint32_t accountId, OperatingS
 			//return;
 		//}
 
-		if (foundPlayer->client) {
-			foundPlayer->disconnect();
-			foundPlayer->isConnecting = true;
+		if (foundPlayer->client && g_configManager().getBoolean(REPLACE_KICK_ON_LOGIN)) {
+        foundPlayer->disconnect();
+        foundPlayer->isConnecting = true;
 
-			eventConnect = g_dispatcher().scheduleEvent(
-				1000,
-				[self = getThis(), playerName = foundPlayer->getName(), operatingSystem] { self->connect(playerName, operatingSystem); }, "ProtocolGame::connect"
-			);
-		} else {
-			connect(foundPlayer->getName(), operatingSystem);
-		}
+        eventConnect = g_dispatcher().scheduleEvent(
+            1000,
+            [self = getThis(), playerName = foundPlayer->getName(), operatingSystem] {
+                self->connect(playerName, operatingSystem);
+            },
+            "ProtocolGame::connect"
+        );
+    } else {
+        connect(foundPlayer->getName(), operatingSystem);
+    }
 	}
 	OutputMessagePool::getInstance().addProtocolToAutosend(shared_from_this());
 	sendBosstiaryCooldownTimer();
