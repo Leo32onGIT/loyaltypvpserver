@@ -656,154 +656,135 @@ void ProtocolGame::login(const std::string &name, uint32_t accountId, OperatingS
 	    player->setName(name);
 			player->setID();
 	}
-		if (!IOLoginDataLoad::preLoadPlayer(player, name)) {
-        disconnectClient("Your character could not be loaded.");
-        return;
-    }
+	if (!IOLoginDataLoad::preLoadPlayer(player, name)) {
+      disconnectClient("Your character could not be loaded.");
+      return;
+  }
 
-		if (IOBan::isPlayerNamelocked(player->getGUID())) {
-			disconnectClient("Your character has been namelocked.");
-			return;
-		}
-
-		if (g_game().getGameState() == GAME_STATE_CLOSING && !player->hasFlag(PlayerFlags_t::CanAlwaysLogin)) {
-			disconnectClient("The game is just going down.\nPlease try again later.");
-			return;
-		}
-
-		if (g_game().getGameState() == GAME_STATE_CLOSED && !player->hasFlag(PlayerFlags_t::CanAlwaysLogin)) {
-			auto maintainMessage = g_configManager().getString(MAINTAIN_MODE_MESSAGE);
-			if (!maintainMessage.empty()) {
-				disconnectClient(maintainMessage);
-			} else {
-				disconnectClient("Server is currently closed.\nPlease try again later.");
-			}
-			return;
-		}
-
-		bool maxClientsByIP = g_configManager().getBoolean(TOGGLE_MAX_CONNECTIONS_BY_IP);
-		if (maxClientsByIP && !player->hasFlag(PlayerFlags_t::CanAlwaysLogin)) {
-			uint32_t ip = player->getIP();
-			std::vector<std::shared_ptr<Player>> playersByIP = g_game().getPlayersByIP(ip);
-			uint32_t maxConnections = static_cast<uint32_t>(g_configManager().getNumber(MAX_IP_CONNECTIONS));
-			if ((playersByIP.size() + 1) > maxConnections) {
-				std::stringstream maxConnectMsg;
-				maxConnectMsg << "You have been disconnected. The maximum number of connections allowed per IP is " << maxConnections << ".";
-				disconnectClient(maxConnectMsg.str().c_str());
-				return;
-			}
-		}
-
-		if (g_configManager().getBoolean(ONLY_PREMIUM_ACCOUNT) && !player->isPremium() && (player->getGroup()->id < GROUP_TYPE_GAMEMASTER || player->getAccountType() < ACCOUNT_TYPE_GAMEMASTER)) {
-			disconnectClient("Your premium time for this account is out.\n\nTo play please buy additional premium time from our website");
-			return;
-		}
-
-		auto onlineCount = g_game().getPlayersByAccount(player->getAccount()).size();
-		auto maxOnline = g_configManager().getNumber(MAX_PLAYERS_PER_ACCOUNT);
-		if (player->getAccountType() < ACCOUNT_TYPE_GAMEMASTER && onlineCount >= maxOnline) {
-			disconnectClient(fmt::format("You may only login with {} character{}\nof your account at the same time.", maxOnline, maxOnline > 1 ? "s" : ""));
-			return;
-		}
-
-		if (!player->hasFlag(PlayerFlags_t::CannotBeBanned)) {
-			BanInfo banInfo;
-			if (IOBan::isAccountBanned(accountId, banInfo)) {
-				if (banInfo.reason.empty()) {
-					banInfo.reason = "(none)";
-				}
-
-				std::ostringstream ss;
-				if (banInfo.expiresAt > 0) {
-					ss << "Your account has been banned until " << formatDateShort(banInfo.expiresAt) << " by " << banInfo.bannedBy << ".\n\nReason specified:\n"
-					   << banInfo.reason;
-				} else {
-					ss << "Your account has been permanently banned by " << banInfo.bannedBy << ".\n\nReason specified:\n"
-					   << banInfo.reason;
-				}
-
-				disconnectClient(ss.str());
-				return;
-			}
-		}
-
-		WaitingList &waitingList = WaitingList::getInstance();
-		if (!waitingList.clientLogin(player)) {
-			auto currentSlot = static_cast<uint32_t>(waitingList.getClientSlot(player));
-			auto retryTime = static_cast<uint32_t>(WaitingList::getTime(currentSlot));
-			std::ostringstream ss;
-
-			ss << "Too many players online.\nYou are at place "
-			   << currentSlot << " on the waiting list.";
-
-			auto output = OutputMessagePool::getOutputMessage();
-			output->addByte(0x16);
-			output->addString(ss.str());
-			output->addByte(retryTime);
-			send(output);
-			disconnect();
-			return;
-		}
-
-		if (!IOLoginData::loadPlayerById(player, player->getGUID(), false)) {
-			disconnectClient("Your character could not be loaded.");
-			g_logger().warn("Player {} could not be loaded", player->getName());
-			return;
-		}
-
-		player->setOperatingSystem(operatingSystem);
-
-		const auto tile = g_game().map.getOrCreateTile(player->getLoginPosition());
-		// moving from a pz tile to a non-pz tile
-		if (maxOnline > 1 && player->getAccountType() < ACCOUNT_TYPE_GAMEMASTER && !tile->hasFlag(TILESTATE_PROTECTIONZONE)) {
-			auto maxOutsizePZ = g_configManager().getNumber(MAX_PLAYERS_OUTSIDE_PZ_PER_ACCOUNT);
-			auto accountPlayers = g_game().getPlayersByAccount(player->getAccount());
-			int countOutsizePZ = 0;
-			for (const auto &accountPlayer : accountPlayers) {
-				if (accountPlayer != player && accountPlayer->getTile() && !accountPlayer->getTile()->hasFlag(TILESTATE_PROTECTIONZONE)) {
-					++countOutsizePZ;
-				}
-			}
-			if (countOutsizePZ >= maxOutsizePZ) {
-				disconnectClient(fmt::format("You can only have {} character{} from your account outside of a protection zone.", maxOutsizePZ == 1 ? "one" : std::to_string(maxOutsizePZ), maxOutsizePZ > 1 ? "s" : ""));
-				return;
-			}
-		}
-
-		if (!g_game().placeCreature(player, player->getLoginPosition()) && !g_game().placeCreature(player, player->getTemplePosition(), false, true)) {
-			disconnectClient("Temple position is wrong. Please, contact the administrator.");
-			g_logger().warn("Player {} temple position is wrong", player->getName());
-			return;
-		}
-
-		player->lastIP = player->getIP();
-		player->lastLoad = OTSYS_TIME();
-		player->lastLoginSaved = std::max<time_t>(time(nullptr), player->lastLoginSaved + 1);
-
-		// Check and distribute weekly task rewards if the reset period has passed
-		g_ioweeklytasks().checkWeeklyRewardsOnLogin(player);
-
-		acceptPackets = true;
-	} else {
-	    if (!foundPlayer) {
-	        return;
-	    }
-
-	    if (foundPlayer->client && g_configManager().getBoolean(REPLACE_KICK_ON_LOGIN)) {
-	        foundPlayer->disconnect();
-	        foundPlayer->isConnecting = true;
-
-	        eventConnect = g_dispatcher().scheduleEvent(
-	            1000,
-	            [self = getThis(), playerName = foundPlayer->getName(), operatingSystem] {
-	                self->connect(playerName, operatingSystem);
-	            },
-	            "ProtocolGame::connect"
-	        );
-	    } else {
-	        connect(foundPlayer->getName(), operatingSystem);
-	    }
+	if (IOBan::isPlayerNamelocked(player->getGUID())) {
+		disconnectClient("Your character has been namelocked.");
+		return;
 	}
+
+	if (g_game().getGameState() == GAME_STATE_CLOSING && !player->hasFlag(PlayerFlags_t::CanAlwaysLogin)) {
+		disconnectClient("The game is just going down.\nPlease try again later.");
+		return;
+	}
+
+	if (g_game().getGameState() == GAME_STATE_CLOSED && !player->hasFlag(PlayerFlags_t::CanAlwaysLogin)) {
+		auto maintainMessage = g_configManager().getString(MAINTAIN_MODE_MESSAGE);
+		if (!maintainMessage.empty()) {
+			disconnectClient(maintainMessage);
+		} else {
+			disconnectClient("Server is currently closed.\nPlease try again later.");
+		}
+		return;
+	}
+
+	bool maxClientsByIP = g_configManager().getBoolean(TOGGLE_MAX_CONNECTIONS_BY_IP);
+	if (maxClientsByIP && !player->hasFlag(PlayerFlags_t::CanAlwaysLogin)) {
+		uint32_t ip = player->getIP();
+		std::vector<std::shared_ptr<Player>> playersByIP = g_game().getPlayersByIP(ip);
+		uint32_t maxConnections = static_cast<uint32_t>(g_configManager().getNumber(MAX_IP_CONNECTIONS));
+		if ((playersByIP.size() + 1) > maxConnections) {
+			std::stringstream maxConnectMsg;
+			maxConnectMsg << "You have been disconnected. The maximum number of connections allowed per IP is " << maxConnections << ".";
+			disconnectClient(maxConnectMsg.str().c_str());
+			return;
+		}
+	}
+
+	if (g_configManager().getBoolean(ONLY_PREMIUM_ACCOUNT) && !player->isPremium() && (player->getGroup()->id < GROUP_TYPE_GAMEMASTER || player->getAccountType() < ACCOUNT_TYPE_GAMEMASTER)) {
+		disconnectClient("Your premium time for this account is out.\n\nTo play please buy additional premium time from our website");
+		return;
+	}
+
+	auto onlineCount = g_game().getPlayersByAccount(player->getAccount()).size();
+	auto maxOnline = g_configManager().getNumber(MAX_PLAYERS_PER_ACCOUNT);
+	if (player->getAccountType() < ACCOUNT_TYPE_GAMEMASTER && onlineCount >= maxOnline) {
+		disconnectClient(fmt::format("You may only login with {} character{}\nof your account at the same time.", maxOnline, maxOnline > 1 ? "s" : ""));
+		return;
+	}
+
+	if (!player->hasFlag(PlayerFlags_t::CannotBeBanned)) {
+		BanInfo banInfo;
+		if (IOBan::isAccountBanned(accountId, banInfo)) {
+			if (banInfo.reason.empty()) {
+				banInfo.reason = "(none)";
+			}
+
+			std::ostringstream ss;
+			if (banInfo.expiresAt > 0) {
+				ss << "Your account has been banned until " << formatDateShort(banInfo.expiresAt) << " by " << banInfo.bannedBy << ".\n\nReason specified:\n"
+				   << banInfo.reason;
+			} else {
+				ss << "Your account has been permanently banned by " << banInfo.bannedBy << ".\n\nReason specified:\n"
+				   << banInfo.reason;
+			}
+
+			disconnectClient(ss.str());
+			return;
+		}
+	}
+
+	WaitingList &waitingList = WaitingList::getInstance();
+	if (!waitingList.clientLogin(player)) {
+		auto currentSlot = static_cast<uint32_t>(waitingList.getClientSlot(player));
+		auto retryTime = static_cast<uint32_t>(WaitingList::getTime(currentSlot));
+		std::ostringstream ss;
+
+		ss << "Too many players online.\nYou are at place "
+		   << currentSlot << " on the waiting list.";
+
+		auto output = OutputMessagePool::getOutputMessage();
+		output->addByte(0x16);
+		output->addString(ss.str());
+		output->addByte(retryTime);
+		send(output);
+		disconnect();
+		return;
+	}
+
+	if (!IOLoginData::loadPlayerById(player, player->getGUID(), false)) {
+		disconnectClient("Your character could not be loaded.");
+		g_logger().warn("Player {} could not be loaded", player->getName());
+		return;
+	}
+
+	player->setOperatingSystem(operatingSystem);
+
+	const auto tile = g_game().map.getOrCreateTile(player->getLoginPosition());
+	// moving from a pz tile to a non-pz tile
+	if (maxOnline > 1 && player->getAccountType() < ACCOUNT_TYPE_GAMEMASTER && !tile->hasFlag(TILESTATE_PROTECTIONZONE)) {
+		auto maxOutsizePZ = g_configManager().getNumber(MAX_PLAYERS_OUTSIDE_PZ_PER_ACCOUNT);
+		auto accountPlayers = g_game().getPlayersByAccount(player->getAccount());
+		int countOutsizePZ = 0;
+		for (const auto &accountPlayer : accountPlayers) {
+			if (accountPlayer != player && accountPlayer->getTile() && !accountPlayer->getTile()->hasFlag(TILESTATE_PROTECTIONZONE)) {
+				++countOutsizePZ;
+			}
+		}
+		if (countOutsizePZ >= maxOutsizePZ) {
+			disconnectClient(fmt::format("You can only have {} character{} from your account outside of a protection zone.", maxOutsizePZ == 1 ? "one" : std::to_string(maxOutsizePZ), maxOutsizePZ > 1 ? "s" : ""));
+			return;
+		}
+	}
+
+	if (!g_game().placeCreature(player, player->getLoginPosition()) && !g_game().placeCreature(player, player->getTemplePosition(), false, true)) {
+		disconnectClient("Temple position is wrong. Please, contact the administrator.");
+		g_logger().warn("Player {} temple position is wrong", player->getName());
+		return;
+	}
+
+	player->lastIP = player->getIP();
+	player->lastLoad = OTSYS_TIME();
+	player->lastLoginSaved = std::max<time_t>(time(nullptr), player->lastLoginSaved + 1);
+
+	// Check and distribute weekly task rewards if the reset period has passed
+	g_ioweeklytasks().checkWeeklyRewardsOnLogin(player);
+
+	acceptPackets = true;
+
 	OutputMessagePool::getInstance().addProtocolToAutosend(shared_from_this());
 	sendBosstiaryCooldownTimer();
 }
