@@ -21,7 +21,7 @@ end
 local function flankFormula(player, level, maglevel)
 	local stage = player:revelationStageWOD("Beam Mastery")
 	print("Beam Mastery raw stage:", stage)
-	local factor = (stage >= 3 and 0.80) or (stage >= 2 and 0.60) or (stage >= 1 and 0.40) or 0
+	local factor = (stage >= 3 and 1.60) or (stage >= 2 and 1.20) or (stage >= 1 and 0.80) or 0
 	print("Beam Mastery factor:", factor)
 	local min = ((calculateBaseDamageHealing(level)) + (maglevel * 5.5)) * factor
 	local max = ((calculateBaseDamageHealing(level)) + (maglevel * 9)) * factor
