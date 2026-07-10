@@ -38,9 +38,36 @@ end
 local MAIN_AREAS = { AREA_BEAM6, AREA_BEAM7, AREA_BEAM8 }
 local MAIN_CB = { "onGetFormulaValuesGrade1", "onGetFormulaValuesGrade2", "onGetFormulaValuesGrade3" }
 local FLANK_AREAS = {
-	{ { 1, 0, 1 }, { 1, 0, 1 }, { 1, 0, 1 }, { 1, 0, 1 }, { 1, 0, 1 }, { 0, 3, 0 } },
-	{ { 1, 0, 1 }, { 1, 0, 1 }, { 1, 0, 1 }, { 1, 0, 1 }, { 1, 0, 1 }, { 1, 0, 1 }, { 0, 3, 0 } },
-	{ { 1, 0, 1 }, { 1, 0, 1 }, { 1, 0, 1 }, { 1, 0, 1 }, { 1, 0, 1 }, { 1, 0, 1 }, { 1, 0, 1 }, { 0, 3, 0 } },
+	{
+		{ 1, 0, 1 },
+		{ 1, 0, 1 },
+		{ 1, 0, 1 },
+		{ 1, 0, 1 },
+		{ 1, 0, 1 },
+		{ 1, 0, 1 },
+		{ 0, 3, 0 },
+	},
+	{
+		{ 1, 0, 1 },
+		{ 1, 0, 1 },
+		{ 1, 0, 1 },
+		{ 1, 0, 1 },
+		{ 1, 0, 1 },
+		{ 1, 0, 1 },
+		{ 1, 0, 1 },
+		{ 0, 3, 0 },
+	},
+	{
+		{ 1, 0, 1 },
+		{ 1, 0, 1 },
+		{ 1, 0, 1 },
+		{ 1, 0, 1 },
+		{ 1, 0, 1 },
+		{ 1, 0, 1 },
+		{ 1, 0, 1 },
+		{ 1, 0, 1 },
+		{ 0, 3, 0 },
+	},
 }
 local FLANK_CB = { "onGetFormulaValuesBeamFlank1", "onGetFormulaValuesBeamFlank2", "onGetFormulaValuesBeamFlank3" }
 
